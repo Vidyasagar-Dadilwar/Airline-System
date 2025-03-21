@@ -8,6 +8,7 @@ public class FlightServiceApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(FlightServiceApplication.class, args);
-        System.out.println("Hello World Flight Service!");
+        System.out.println("Flight Service Application Started");
     }
+
 }

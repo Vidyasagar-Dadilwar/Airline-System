@@ -9,7 +9,7 @@ public class TicketServiceApplication {
     public static void main(String[] args) {
 
         SpringApplication.run(TicketServiceApplication.class, args);
-        System.out.println("Hello World Ticket Service!");
+        System.out.println("Ticket Service Application Started");
     }
 
 }

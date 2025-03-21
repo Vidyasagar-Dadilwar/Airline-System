@@ -7,9 +7,15 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
-    private String phone;
-    private String firstName;
-    private String lastName;
     private Long id;
+
     private String email;
+
+    private String firstName;
+
+    private String lastName;
+
+
+    private String phone;
+
 }

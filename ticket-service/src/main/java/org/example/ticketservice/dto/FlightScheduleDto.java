@@ -1,7 +1,6 @@
 package org.example.ticketservice.dto;
 
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Data
@@ -9,14 +8,23 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FlightScheduleDto {
-    private String destination;
-    private Long id;;
-    private String status;
-    private Double price;
-    private String flightNumber;
-    private Integer availableSeats;
+    private Long id;
+
     private Long flightId;
-    private String origin;
-    private LocalDateTime arrivalTime;
+
+    private String status;
+
     private LocalDateTime departureTime;
+
+    private LocalDateTime arrivalTime;
+
+    private String origin;
+
+    private String destination;
+
+    private String flightNumber;
+
+    private Integer availableSeats;
+
+    private Double price;
 }

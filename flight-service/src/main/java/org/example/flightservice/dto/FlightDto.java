@@ -1,38 +1,35 @@
 package org.example.flightservice.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.*;
+import lombok.*;
 
 @Data
 @Builder
 @AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
 public class FlightDto {
-    private long id;
+    private Long id;
 
-    @NotBlank(message = "Flight number is required")
-    private String flightNumber;
-
-    @NotBlank(message = "Origin is required")
+    @NotBlank(message = "Enter Origin")
     private String origin;
-
-    @NotBlank(message = "Destination is required")
+    @NotBlank(message = "Enter Destination")
     private String destination;
 
-    @NotNull(message = "Capacity is required")
+    @NotBlank(message = "Enter flight number")
+    private String flightNumber;
+
+    @NotNull(message = "Enter capacity")
     @Positive(message = "Capacity must be positive")
     private Integer capacity;
 
-    @NotNull(message = "Available seats are required")
+    @NotNull(message = "Enter available seats")
     @Positive(message = "Available seats must be positive")
     private Integer availableSeats;
 
-    @NotNull(message = "Price is required")
-    @Positive(message = "Price must be positive")
+    @NotNull(message = "Enter price")
+    @Positive(message = "price must be positive")
     private Double price;
 }
+

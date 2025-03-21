@@ -1,112 +1,45 @@
 package org.example.ticketservice.service;
 
+import org.example.ticketservice.dto.*;
+import org.example.ticketservice.model.Ticket;
+import org.example.ticketservice.repository.TicketRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.example.ticketservice.dto.*;
-import org.example.ticketservice.model.Ticket;
-import org.example.ticketservice.repository.TicketRepository;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final RestTemplate restTemplate;
 
-    @Value("${flight.service.url}")
-    private String FLIGHT_SERVICE_URL;
-
-    @Value("${user.service.url}")
-    private String USER_SERVICE_URL;
-
-    public TicketService(TicketRepository ticketRepository, RestTemplate restTemplate) {
-        this.ticketRepository = ticketRepository;
-        this.restTemplate = restTemplate;
-    }
+    private static final String FLIGHT_SERVICE_URL = "http://localhost:8081/flights";
+    private static final String USER_SERVICE_URL = "http://localhost:8080/users";
 
     @Transactional(readOnly = true)
     public TicketDto getTicketById(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket with this id does not exist"));
 
-        UserDto user;
-        FlightDto flight;
-        FlightScheduleDto schedule;
-
-        try {
-            user = restTemplate.getForObject(
-                    USER_SERVICE_URL + "/{id}",
-                    UserDto.class,
-                    ticket.getUserId()
-            );
-        } catch (HttpClientErrorException.NotFound ex) {
-            throw new IllegalArgumentException("Invalid User ID provided");
-        }
-
-        try {
-            flight = restTemplate.getForObject(
-                    FLIGHT_SERVICE_URL + "/{id}",
-                    FlightDto.class,
-                    ticket.getFlightId()
-            );
-        } catch (HttpClientErrorException.NotFound ex) {
-            throw new IllegalArgumentException("Invalid Flight ID provided");
-        }
-
-        try {
-            schedule = restTemplate.getForObject(
-                    FLIGHT_SERVICE_URL + "/schedules/{id}",
-                    FlightScheduleDto.class,
-                    ticket.getFlightScheduleId()
-            );
-        } catch (HttpClientErrorException.NotFound ex) {
-            throw new IllegalArgumentException("Invalid Schedule ID provided");
-        }
+        UserDto user = fetchUser(ticket.getUserId());
+        FlightDto flight = fetchFlight(ticket.getFlightId());
+        FlightScheduleDto schedule = fetchSchedule(ticket.getFlightScheduleId());
 
         return toDto(ticket, user, flight, schedule);
     }
 
     @Transactional
     public TicketDto createTicket(CreateTicketRequest request) {
-        UserDto user;
-        FlightDto flight;
-        FlightScheduleDto schedule;
-
-        try {
-            user = restTemplate.getForObject(
-                    USER_SERVICE_URL + "/{id}",
-                    UserDto.class,
-                    request.getUserId()
-            );
-        } catch (HttpClientErrorException.NotFound ex) {
-            throw new IllegalArgumentException("Invalid User ID provided");
-        }
-
-        try {
-            flight = restTemplate.getForObject(
-                    FLIGHT_SERVICE_URL + "/{id}",
-                    FlightDto.class,
-                    request.getFlightId()
-            );
-        } catch (HttpClientErrorException.NotFound ex) {
-            throw new IllegalArgumentException("Invalid Flight ID provided");
-        }
-
-        try {
-            schedule = restTemplate.getForObject(
-                    FLIGHT_SERVICE_URL + "/schedules/{id}",
-                    FlightScheduleDto.class,
-                    request.getFlightScheduleId()
-            );
-        } catch (HttpClientErrorException.NotFound ex) {
-            throw new IllegalArgumentException("Invalid Schedule ID provided");
-        }
+        UserDto user = fetchUser(request.getUserId());
+        FlightDto flight = fetchFlight(request.getFlightId());
+        FlightScheduleDto schedule = fetchSchedule(request.getFlightScheduleId());
 
         String seatNumber = "S" + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
 
@@ -132,7 +65,30 @@ public class TicketService {
         ticketRepository.save(ticket);
     }
 
-    // Mapper Method - Used to convert Ticket, User, Flight, and Schedule to TicketDto
+    private UserDto fetchUser(Long userId) {
+        try {
+            return restTemplate.getForObject(USER_SERVICE_URL + "/{id}", UserDto.class, userId);
+        } catch (HttpClientErrorException.NotFound ex) {
+            throw new IllegalArgumentException("Invalid User ID provided");
+        }
+    }
+
+    private FlightDto fetchFlight(Long flightId) {
+        try {
+            return restTemplate.getForObject(FLIGHT_SERVICE_URL + "/{id}", FlightDto.class, flightId);
+        } catch (HttpClientErrorException.NotFound ex) {
+            throw new IllegalArgumentException("Invalid Flight ID provided");
+        }
+    }
+
+    private FlightScheduleDto fetchSchedule(Long scheduleId) {
+        try {
+            return restTemplate.getForObject(FLIGHT_SERVICE_URL + "/schedules/{id}", FlightScheduleDto.class, scheduleId);
+        } catch (HttpClientErrorException.NotFound ex) {
+            throw new IllegalArgumentException("Invalid Schedule ID provided");
+        }
+    }
+
     private TicketDto toDto(Ticket ticket, UserDto user, FlightDto flight, FlightScheduleDto schedule) {
         return TicketDto.builder()
                 .id(ticket.getId())
@@ -149,20 +105,6 @@ public class TicketService {
                 .seatNumber(ticket.getSeatNumber())
                 .status(ticket.getStatus())
                 .bookingTime(ticket.getBookingTime())
-                .build();
-    }
-
-    // Optional: Mapper Method to convert TicketDto back to Ticket entity
-    private Ticket toTicket(TicketDto dto) {
-        return Ticket.builder()
-                .id(dto.getId())
-                .userId(dto.getUserId())
-                .flightId(dto.getFlightId())
-                .flightScheduleId(dto.getFlightScheduleId())
-                .seatNumber(dto.getSeatNumber())
-                .status(dto.getStatus())
-                .bookingTime(dto.getBookingTime())
-                .price(dto.getPrice())
                 .build();
     }
 }

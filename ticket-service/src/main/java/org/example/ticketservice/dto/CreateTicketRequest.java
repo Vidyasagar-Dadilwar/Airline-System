@@ -8,13 +8,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateTicketRequest {
-    @NotNull(message = "user id is required")
+    @NotNull(message = "Enter user id")
     private Long userId;
 
-    @NotNull(message = "flight id is required")
+    @NotNull(message = "Enter flight id")
     private Long flightId;
 
-    @NotNull(message = "flight schedule id is required")
+    @NotNull(message = "Enter flight schedule id")
     private Long flightScheduleId;
-
 }
+
