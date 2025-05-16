@@ -1,7 +1,5 @@
-# Multi-stage build for flight-service
-
 # Stage 1: Build and test the application
-FROM maven:eclipse-temurin:17-jdk-alpine AS build
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copy the pom.xml file
